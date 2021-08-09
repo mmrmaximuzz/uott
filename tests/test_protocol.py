@@ -24,3 +24,9 @@ def test_udp_to_tcp_oversized():
     with pytest.raises(AssertionError):
         udp_dgram = b"0" * 65536
         protocol.udp_dgram_to_tcp_msg(udp_dgram)
+
+
+def test_tcp_to_udp_empty():
+    """Convert empty UDP datagrams back from TCP."""
+    uott_msg = b"UOTT\x00\x00"
+    assert protocol.tcp_msg_to_udp_dgram(uott_msg) == b""
