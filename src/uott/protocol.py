@@ -16,7 +16,7 @@ def udp_dgram_to_tcp_msg(dgram: bytes) -> bytes:
 def tcp_msg_to_udp_dgram(msg: bytes) -> bytes:
     """Convert UOTT TCP message to UDP datagram."""
     msg_len = len(msg)
-    assert msg_len >= len(MAGIC) + 2
+    assert msg_len >= len(MAGIC) + LEN_BYTES
 
     magic, udp_len, dgram = msg[:4], msg[4:6], msg[6:]
     assert magic == MAGIC
