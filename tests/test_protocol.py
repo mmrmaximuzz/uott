@@ -37,3 +37,10 @@ def test_tcp_to_udp_bad_magic():
     with pytest.raises(AssertionError):
         uott_msg = b"HAHA\x00\x00"
         protocol.tcp_msg_to_udp_dgram(uott_msg)
+
+
+def test_tcp_to_udp_too_short():
+    """Should raise assertion when the message is too short."""
+    with pytest.raises(AssertionError):
+        uott_msg = b"UOTT\x00"
+        protocol.tcp_msg_to_udp_dgram(uott_msg)
