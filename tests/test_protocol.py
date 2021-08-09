@@ -44,3 +44,10 @@ def test_tcp_to_udp_too_short():
     with pytest.raises(AssertionError):
         msg = b"UOTT\x00"
         protocol.tcp_msg_to_udp_dgram(msg)
+
+
+def test_tcp_to_udp_dgram_len_short():
+    """Should raise assertion when the dgram len lesser than msg field."""
+    with pytest.raises(AssertionError):
+        msg = b"UOTT\x03\x00\xff\xff"
+        protocol.tcp_msg_to_udp_dgram(msg)
