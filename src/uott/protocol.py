@@ -1,6 +1,8 @@
 """protocol - base definitions for uott protocol."""
 
 MAGIC = b"UOTT"
+LEN_BYTES = 2
+BYTEORDER = "little"
 
 
 def udp_dgram_to_tcp_msg(dgram: bytes) -> bytes:
@@ -8,7 +10,7 @@ def udp_dgram_to_tcp_msg(dgram: bytes) -> bytes:
     udp_len = len(dgram)
     assert udp_len <= 0xFFFF
 
-    return MAGIC + udp_len.to_bytes(2, "little") + dgram
+    return MAGIC + udp_len.to_bytes(LEN_BYTES, BYTEORDER) + dgram
 
 
 def tcp_msg_to_udp_dgram(msg: bytes) -> bytes:
@@ -18,6 +20,6 @@ def tcp_msg_to_udp_dgram(msg: bytes) -> bytes:
 
     magic, udp_len, dgram = msg[:4], msg[4:6], msg[6:]
     assert magic == MAGIC
-    assert int.from_bytes(udp_len, "little") == len(dgram)
+    assert int.from_bytes(udp_len, BYTEORDER) == len(dgram)
 
     return dgram
