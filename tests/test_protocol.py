@@ -58,3 +58,10 @@ def test_tcp_to_udp_dgram_len_long():
     with pytest.raises(AssertionError):
         msg = b"UOTT\x03\x00\xff\xff\xff\xff"
         protocol.tcp_msg_to_udp_dgram(msg)
+
+
+def test_tcp_to_udp_dgram_normal():
+    """Test ordinary uott messages."""
+    msg = b"UOTT\x03\x00\xff\xff\xff"
+    dgram = protocol.tcp_msg_to_udp_dgram(msg)
+    assert dgram == b"\xff\xff\xff"
