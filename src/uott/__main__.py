@@ -1,7 +1,7 @@
 """Daemon launcher for uott."""
 
 
-def main():
+def main() -> None:
     """Entry point for uott daemon."""
     print("hello world")
 
