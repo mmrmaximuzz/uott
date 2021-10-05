@@ -1,5 +1,7 @@
 """protocol - base definitions for uott protocol."""
 
+from typing import Optional, Tuple
+
 MAGIC = b"UOTT"
 LEN_BYTES = 2
 BYTEORDER = "little"
@@ -13,13 +15,28 @@ def udp_dgram_to_tcp_msg(dgram: bytes) -> bytes:
     return MAGIC + udp_len.to_bytes(LEN_BYTES, BYTEORDER) + dgram
 
 
-def tcp_msg_to_udp_dgram(msg: bytes) -> bytes:
+def _split_at(bs: bytes, idx: int) -> Tuple[bytes, bytes]:
+    """Split the bytestring by given index."""
+    return bs[:idx], bs[idx:]
+
+
+def tcp_msg_to_udp_dgram(msg: bytes) -> Optional[Tuple[bytes, bytes]]:
     """Convert UOTT TCP message to UDP datagram."""
-    msg_len = len(msg)
-    assert msg_len >= len(MAGIC) + LEN_BYTES
+    if len(msg) < len(MAGIC):
+        # magic is not complete
+        return None
 
-    magic, udp_len, dgram = msg[:4], msg[4:6], msg[6:]
-    assert magic == MAGIC
-    assert int.from_bytes(udp_len, BYTEORDER) == len(dgram)
+    magic, msg = _split_at(msg, len(MAGIC))
+    assert magic == MAGIC, f"UOTT protocol is corrupted: wrong magic {magic}"
 
-    return dgram
+    if len(msg) < LEN_BYTES:
+        # length is not complete
+        return None
+
+    udp_len_bytes, msg = _split_at(msg, LEN_BYTES)
+    udp_len = int.from_bytes(udp_len_bytes, BYTEORDER)
+    if len(msg) < udp_len:
+        # message is not complete
+        return None
+
+    return _split_at(msg, udp_len)
