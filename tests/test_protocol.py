@@ -29,7 +29,7 @@ def test_udp_to_tcp_oversized():
 def test_tcp_to_udp_empty():
     """Convert empty UDP datagrams back from TCP."""
     msg = b"UOTT\x00\x00"
-    assert protocol.tcp_msg_to_udp_dgram(msg) == b""
+    assert protocol.tcp_msg_to_udp_dgram(msg) == (b"", b"")
 
 
 def test_tcp_to_udp_bad_magic():
@@ -40,28 +40,30 @@ def test_tcp_to_udp_bad_magic():
 
 
 def test_tcp_to_udp_too_short():
-    """Should raise assertion when the message is too short."""
-    with pytest.raises(AssertionError):
-        msg = b"UOTT\x00"
-        protocol.tcp_msg_to_udp_dgram(msg)
+    """Should return None when the message is too short."""
+    for msg in (b"U", b"UO", b"UOT", b"UOTT", b"UOTT\x00"):
+        assert protocol.tcp_msg_to_udp_dgram(msg) is None
 
 
 def test_tcp_to_udp_dgram_len_short():
     """Should raise assertion when the dgram len lesser than msg field."""
-    with pytest.raises(AssertionError):
-        msg = b"UOTT\x03\x00\xff\xff"
-        protocol.tcp_msg_to_udp_dgram(msg)
-
-
-def test_tcp_to_udp_dgram_len_long():
-    """Should raise assertion when the dgram len greater than msg field."""
-    with pytest.raises(AssertionError):
-        msg = b"UOTT\x03\x00\xff\xff\xff\xff"
-        protocol.tcp_msg_to_udp_dgram(msg)
+    header = b"UOTT\x03\x00"
+    for data in (b"", b"\xff", b"\xff\xff"):
+        msg = header + data
+        assert protocol.tcp_msg_to_udp_dgram(msg) is None
 
 
 def test_tcp_to_udp_dgram_normal():
     """Test ordinary uott messages."""
     msg = b"UOTT\x03\x00\xff\xff\xff"
-    dgram = protocol.tcp_msg_to_udp_dgram(msg)
+    dgram, rest = protocol.tcp_msg_to_udp_dgram(msg)
     assert dgram == b"\xff\xff\xff"
+    assert rest == b""
+
+
+def test_tcp_to_udp_dgram_len_long():
+    """Should raise assertion when the dgram len greater than msg field."""
+    msg = b"UOTT\x03\x00\xff\xff\xff\xff"
+    dgram, rest = protocol.tcp_msg_to_udp_dgram(msg)
+    assert dgram == b"\xff\xff\xff"
+    assert rest == b"\xff"
