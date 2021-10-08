@@ -31,7 +31,7 @@ def recv_from_tunnel(tcp: socket.socket,
     """Take a chunk from TCP stream and collect."""
     with contextlib.suppress(BlockingIOError):
         while True:
-            data = tcp.recv(1024, socket.MSG_DONTWAIT)
+            data = tcp.recv(4096, socket.MSG_DONTWAIT)
             dgram = sttrans.send(data)
             if dgram is not None:
                 udp.send(dgram)
