@@ -18,7 +18,7 @@ def _client_loop(client: socket.socket, proxy: socket.socket) -> None:
     revmap: Dict[int, EndPoint] = {}
 
     while True:
-        data, endpoint = client.recvfrom(65536)
+        data, endpoint = client.recvfrom(65535)
         if endpoint not in dirmap:
             LOG.info("new client endpoint: %s", endpoint)
             tag = next(lasttag)
