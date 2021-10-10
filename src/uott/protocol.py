@@ -20,7 +20,7 @@ def udp_dgram_to_tcp_msg(dgram: bytes, tag: int) -> bytes:
         MAGIC,
         tag.to_bytes(TAG_BYTES, BYTEORDER),
         dlen.to_bytes(LEN_BYTES, BYTEORDER),
-        dgram
+        dgram,
     ]
     return b"".join(parts)
 
