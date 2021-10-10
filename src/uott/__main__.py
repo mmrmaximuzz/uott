@@ -1,8 +1,10 @@
 """Launcher for UOTT."""
 
 import argparse
+import logging
 
 from .utils import parse_endpoint
+from .client import start_uott_client
 
 
 def parse_cli_args() -> argparse.Namespace:
@@ -19,8 +21,9 @@ def parse_cli_args() -> argparse.Namespace:
 
 def main() -> None:
     """Entry point for UOTT daemon."""
-    opts = parse_cli_args()
+    logging.basicConfig(level=logging.INFO)
 
+    opts = parse_cli_args()
     local = parse_endpoint(opts.local)
     remote = parse_endpoint(opts.remote)
 
