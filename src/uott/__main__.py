@@ -2,21 +2,17 @@
 
 import argparse
 
+from .utils import parse_endpoint
+
 
 def parse_cli_args() -> argparse.Namespace:
     """Parse CLI arguments when called from command line."""
     parser = argparse.ArgumentParser()
 
-    subparsers = parser.add_subparsers(help="UOTT mode", dest="mode")
-
-    proxy = subparsers.add_parser("proxy", help="run UOTT in proxy mode")
-    proxy.add_argument("local-udp")
-    proxy.add_argument("remote-tcp")
-
-    client = subparsers.add_parser("client", help="run UOTT in client mode")
-    client.set_defaults(mode="client")
-    client.add_argument("local-tcp")
-    client.add_argument("remote-udp")
+    parser.add_argument("mode", choices=("proxy", "client"),
+                        help="select a mode for UOTT")
+    parser.add_argument("local", help="local endpoint")
+    parser.add_argument("remote", help="remote endpoint")
 
     return parser.parse_args()
 
@@ -24,7 +20,17 @@ def parse_cli_args() -> argparse.Namespace:
 def main() -> None:
     """Entry point for UOTT daemon."""
     opts = parse_cli_args()
-    print(opts)
+
+    local = parse_endpoint(opts.local)
+    remote = parse_endpoint(opts.remote)
+
+    if opts.mode == "proxy":
+        return start_uott_proxy(local, remote)
+
+    if opts.mode == "client":
+        return start_uott_client(local, remote)
+
+    assert opts.mode in ("proxy", "client")
 
 
 if __name__ == "__main__":
