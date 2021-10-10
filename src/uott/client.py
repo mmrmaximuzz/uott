@@ -19,14 +19,13 @@ def _client_loop(client: socket.socket, proxy: socket.socket) -> None:
 
     while True:
         data, endpoint = client.recvfrom(65536)
-        LOG.info("get a data from %s", endpoint)
         if endpoint not in dirmap:
+            LOG.info("new client endpoint: %s", endpoint)
             tag = next(lasttag)
             dirmap[endpoint] = tag
             revmap[tag] = endpoint
-            LOG.info("new client endpoint: tag = %s", tag)
 
-        proxy.sendall(f"{tag}".encode() + b":" + data + b"\n")
+        proxy.sendall(f"{tag}".encode() + b":" + data)
 
     print(data)
 
