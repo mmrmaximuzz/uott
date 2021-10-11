@@ -3,8 +3,9 @@
 import argparse
 import logging
 
-from .utils import parse_endpoint
 from .client import start_uott_client
+from .proxy import start_uott_proxy
+from .utils import parse_endpoint
 
 
 def parse_cli_args() -> argparse.Namespace:

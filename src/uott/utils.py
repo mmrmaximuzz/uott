@@ -5,9 +5,9 @@ from typing import Tuple
 EndPoint = Tuple[str, int]
 
 
-def split_at(bs: bytes, idx: int) -> Tuple[bytes, bytes]:
+def split_at(bstring: bytes, idx: int) -> Tuple[bytes, bytes]:
     """Split the bytestring by given index."""
-    return bs[:idx], bs[idx:]
+    return bstring[:idx], bstring[idx:]
 
 
 def parse_endpoint(line: str) -> EndPoint:
