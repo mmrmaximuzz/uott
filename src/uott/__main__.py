@@ -28,10 +28,12 @@ def main() -> None:
     remote = parse_endpoint(opts.remote)
 
     if opts.mode == "proxy":
-        return start_uott_proxy(local, remote)
+        start_uott_proxy(local, remote)
+        return
 
     if opts.mode == "client":
-        return start_uott_client(local, remote)
+        start_uott_client(local, remote)
+        return
 
     assert opts.mode in ("proxy", "client")
 

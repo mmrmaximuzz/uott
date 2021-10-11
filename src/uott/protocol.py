@@ -13,7 +13,7 @@ _BYTEORDER = "little"
 UOTTTag = int
 UOTTData = bytes
 UOTTMsg = Tuple[UOTTTag, UOTTData]
-StreamTransformer = Generator[bytes, List[UOTTMsg], None]
+StreamTransformer = Generator[List[UOTTMsg], bytes, None]
 
 
 @dataclass
@@ -25,7 +25,7 @@ class _UOTTFrags:
     len: bytes
     data: bytes
 
-    def clear(self):
+    def clear(self) -> None:
         """Clear all collected fragments."""
         self.magic = b""
         self.tag = b""
@@ -47,7 +47,7 @@ def _deserialize_chunk(chunk: bytes, frags: _UOTTFrags) -> List[UOTTMsg]:
             frags.magic += appendix
 
             # check magic immediately to detect stream corruption early
-            assert _MAGIC.startswith(frags.magic), f"corrupted: {frags.magic}"
+            assert _MAGIC.startswith(frags.magic), f"corrupt: {frags.magic!r}"
 
         if len(frags.tag) < _TAG_BYTES:
             delta = _TAG_BYTES - len(frags.tag)
@@ -81,7 +81,7 @@ def _deserialize_chunk(chunk: bytes, frags: _UOTTFrags) -> List[UOTTMsg]:
 def deserialize() -> StreamTransformer:
     """Deserialize UOTT message from bytestream using coroutine."""
     # accumulate ready messages from the stream
-    msgs = []
+    msgs: List[UOTTMsg] = []
 
     # keep already collected message fragments
     frags = _UOTTFrags(b"", b"", b"", b"")
