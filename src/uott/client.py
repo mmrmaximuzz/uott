@@ -7,7 +7,7 @@ import socket
 from itertools import count
 from typing import Dict, Iterator
 
-from .protocol import serialize, deserialize
+from .protocol import serialize, deserialize, StreamTransformer
 from .utils import EndPoint
 
 LOG = logging.getLogger("client")
@@ -32,7 +32,10 @@ def _process_client(client: socket.socket, proxy: socket.socket,
             proxy.sendall(message)
 
 
-def _process_proxy():
+def _process_proxy(client: socket.socket, proxy: socket.socket,
+                   revmap: Dict[int, EndPoint],
+                   deserializer: StreamTransformer) -> None:
+    """Process flow from the proxy."""
     raise NotImplementedError
 
 
