@@ -36,7 +36,17 @@ def _process_proxy(client: socket.socket, proxy: socket.socket,
                    revmap: Dict[int, EndPoint],
                    deserializer: StreamTransformer) -> None:
     """Process flow from the proxy."""
-    raise NotImplementedError
+    with contextlib.suppress(BlockingIOError):
+        while True:
+            chunk = proxy.recv(4096, socket.MSG_DONTWAIT)
+            if not chunk:
+                LOG.info("the proxy has closed the connection")
+                exit(0)
+
+            msgs = deserializer.send(chunk)
+            for tag, dgram in msgs:
+                assert tag in revmap, "proxy and client are not synchronized"
+                client.sendto(dgram, revmap[tag])
 
 
 def _client_loop(client: socket.socket, proxy: socket.socket) -> None:
