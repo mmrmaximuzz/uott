@@ -95,7 +95,7 @@ def _proxy_loop(local: socket.socket, remote_ep: EndPoint) -> None:
         with contextlib.suppress(_ClientDisconnected):
             _proxy_serve_client(client, remote_ep)
 
-        LOG.info("client %s disconnected, stop proxying")
+        LOG.info("client %s disconnected, stop proxying", addr)
 
 
 def start_uott_proxy(local_tcp: EndPoint, remote_udp: EndPoint) -> None:
