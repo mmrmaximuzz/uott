@@ -39,7 +39,7 @@ def _process_proxy(client: socket.socket, proxy: socket.socket,
     with contextlib.suppress(BlockingIOError):
         while True:
             chunk = proxy.recv(4096, socket.MSG_DONTWAIT)
-            assert chunk, "the closed the connection, may be proxy failure"
+            assert chunk, "the TCP connection is closed, may be proxy failure"
 
             msgs = deserializer.send(chunk)
             for tag, dgram in msgs:
