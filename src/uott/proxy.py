@@ -6,7 +6,7 @@ import selectors
 import socket
 from typing import Dict
 
-from .protocol import deserialize, StreamTransformer
+from .protocol import deserialize, serialize, StreamTransformer
 from .utils import EndPoint
 
 LOG = logging.getLogger("proxy")
@@ -42,6 +42,20 @@ def _process_client(client: socket.socket, remote_ep: EndPoint,
                 sock.sendto(dgram, remote_ep)
 
 
+def _process_remote(sock: socket.socket, client: socket.socket,
+                    remote_ep: EndPoint, tag: int) -> None:
+    """Process messages from the local UDP socket."""
+    with contextlib.suppress(BlockingIOError):
+        while True:
+            dgram, addr = sock.recvfrom(65535, socket.MSG_DONTWAIT)
+            if addr != remote_ep:
+                # ignore other endpoints' messages
+                continue
+
+            msg = serialize((tag, dgram))
+            client.sendall(msg)
+
+
 def _proxy_serve_client(client: socket.socket, remote_ep: EndPoint) -> None:
     """Run new proxy session."""
     # prepare mappings for local UDP endpoints
@@ -67,7 +81,8 @@ def _proxy_serve_client(client: socket.socket, remote_ep: EndPoint) -> None:
                 sock = key.fileobj
                 assert sock in revmap, "corrupted selector"
 
-                _process_remote(sock, client, remote_ep, revmap)
+                tag = revmap[sock]
+                _process_remote(sock, client, remote_ep, tag)
 
 
 def _proxy_loop(local: socket.socket, remote_ep: EndPoint) -> None:
