@@ -64,8 +64,10 @@ def _proxy_serve_client(client: socket.socket, remote_ep: EndPoint) -> None:
                                 tagmap, revmap,
                                 sel, deserializer)
             else:
-                assert key.fileobj in revmap, "corrupted selector"
-                raise NotImplementedError
+                sock = key.fileobj
+                assert sock in revmap, "corrupted selector"
+
+                _process_remote(sock, client, remote_ep, revmap)
 
 
 def _proxy_loop(local: socket.socket, remote_ep: EndPoint) -> None:
