@@ -1,11 +1,31 @@
 """Proxy module for UOTT."""
 
+import contextlib
 import logging
+import selectors
 import socket
+from typing import Dict
 
+from .protocol import deserialize, StreamTransformer
 from .utils import EndPoint
 
 LOG = logging.getLogger("proxy")
+
+
+class _ClientDisconnected(Exception):
+    """Raise this exception to break server loop on client disconnect."""
+
+
+def _process_client(client: socket.socket, remote_ep: EndPoint,
+                    tagmap: Dict[int, socket.socket],
+                    revmap: Dict[socket.socket, int],
+                    deserializer: StreamTransformer) -> None:
+    """Process TCP flow from the client."""
+    with contextlib.suppress(BlockingIOError):
+        while True:
+            chunk = client.recv(4096, socket.MSG_DONTWAIT)
+            if not chunk:
+                raise _ClientDisconnected
 
 
 def _proxy_serve_client(client: socket.socket, remote_ep: EndPoint) -> None:
@@ -21,20 +41,16 @@ def _proxy_serve_client(client: socket.socket, remote_ep: EndPoint) -> None:
     # prepare stream transformer for TCP flow
     deserializer = deserialize()
 
-    try:
-        while True:
-            events = sel.select()
-            for key, _ in events:
-                if key.fileobj is client:
-                    _process_client(client, remote_ep,
-                                    tagmap, revmap,
-                                    deserializer)
-                else:
-                    assert key.fileobj in revmap, "corrupted selector"
-                    raise NotImplementedError
-
-    except KeyboardInterrupt:
-        LOG.info("\nInterrupted, closing")
+    while True:
+        events = sel.select()
+        for key, _ in events:
+            if key.fileobj is client:
+                _process_client(client, remote_ep,
+                                tagmap, revmap,
+                                deserializer)
+            else:
+                assert key.fileobj in revmap, "corrupted selector"
+                raise NotImplementedError
 
 
 def _proxy_loop(local: socket.socket, remote_ep: EndPoint) -> None:
@@ -44,7 +60,10 @@ def _proxy_loop(local: socket.socket, remote_ep: EndPoint) -> None:
         client, addr = local.accept()
 
         LOG.info("client %s connected, start proxying", addr)
-        _proxy_serve_client(client, remote_ep)
+        with contextlib.suppress(_ClientDisconnected):
+            _proxy_serve_client(client, remote_ep)
+
+        LOG.info("client %s disconnected, stop proxying")
 
 
 def start_uott_proxy(local_tcp: EndPoint, remote_udp: EndPoint) -> None:
@@ -57,4 +76,7 @@ def start_uott_proxy(local_tcp: EndPoint, remote_udp: EndPoint) -> None:
     local.listen(1)
 
     LOG.info("starting proxy loop")
-    _proxy_loop(local, remote_udp)
+    with contextlib.suppress(KeyboardInterrupt):
+        _proxy_loop(local, remote_udp)
+
+    LOG.info("\nInterrupted, closing")
