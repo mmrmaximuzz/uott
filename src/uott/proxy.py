@@ -19,6 +19,7 @@ class _ClientDisconnected(Exception):
 def _process_client(client: socket.socket, remote_ep: EndPoint,
                     tagmap: Dict[int, socket.socket],
                     revmap: Dict[socket.socket, int],
+                    selector: selectors.DefaultSelector,
                     deserializer: StreamTransformer) -> None:
     """Process TCP flow from the client."""
     with contextlib.suppress(BlockingIOError):
@@ -26,6 +27,19 @@ def _process_client(client: socket.socket, remote_ep: EndPoint,
             chunk = client.recv(4096, socket.MSG_DONTWAIT)
             if not chunk:
                 raise _ClientDisconnected
+
+            msgs = deserializer.send(chunk)
+            for tag, dgram in msgs:
+                if tag not in tagmap:
+                    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                    sock.bind(("127.0.0.1", 0))  # TODO: take bind IP from CLI
+                    tagmap[tag] = sock
+                    revmap[sock] = tag
+                    selector.register(sock, selectors.EVENT_READ)
+                    LOG.info("proxying new UDP socket: %s", sock.getsockname())
+
+                sock = tagmap[tag]
+                sock.sendto(dgram, remote_ep)
 
 
 def _proxy_serve_client(client: socket.socket, remote_ep: EndPoint) -> None:
@@ -47,7 +61,7 @@ def _proxy_serve_client(client: socket.socket, remote_ep: EndPoint) -> None:
             if key.fileobj is client:
                 _process_client(client, remote_ep,
                                 tagmap, revmap,
-                                deserializer)
+                                sel, deserializer)
             else:
                 assert key.fileobj in revmap, "corrupted selector"
                 raise NotImplementedError
