@@ -9,7 +9,32 @@ LOG = logging.getLogger("proxy")
 
 
 def _proxy_serve_client(client: socket.socket, remote_ep: EndPoint) -> None:
-    raise NotImplementedError
+    """Run new proxy session."""
+    # prepare mappings for local UDP endpoints
+    tagmap: Dict[int, socket.socket] = {}
+    revmap: Dict[socket.socket, int] = {}
+
+    # put the initial client socket in a new selector
+    sel = selectors.DefaultSelector()
+    sel.register(client, selectors.EVENT_READ)
+
+    # prepare stream transformer for TCP flow
+    deserializer = deserialize()
+
+    try:
+        while True:
+            events = sel.select()
+            for key, _ in events:
+                if key.fileobj is client:
+                    _process_client(client, remote_ep,
+                                    tagmap, revmap,
+                                    deserializer)
+                else:
+                    assert key.fileobj in revmap, "corrupted selector"
+                    raise NotImplementedError
+
+    except KeyboardInterrupt:
+        LOG.info("\nInterrupted, closing")
 
 
 def _proxy_loop(local: socket.socket, remote_ep: EndPoint) -> None:
