@@ -54,6 +54,7 @@ def _proxy_serve_client(client: socket.socket, remote_ep: EndPoint) -> None:
 
     # prepare stream transformer for TCP flow
     deserializer = deserialize()
+    deserializer.send(None)
 
     while True:
         events = sel.select()
