@@ -72,7 +72,7 @@ def _client_loop(client: socket.socket, proxy: socket.socket) -> None:
                 if key.fileobj is proxy:
                     _process_proxy(client, proxy, revmap, deserializer)
 
-    print("\nCtrl+C, closing")
+    LOG.info("\nInterrupted, closing")
 
 
 def start_uott_client(local_udp: EndPoint, remote_tcp: EndPoint) -> None:
