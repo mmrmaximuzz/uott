@@ -89,14 +89,17 @@ def _proxy_loop(local: socket, remote_ep: EndPoint) -> None:
     """Run proxy loop forever."""
     while True:
         LOG.info("waiting for the client to connect...")
-        client, addr = local.accept()
+        sock, addr = local.accept()
 
-        LOG.info("client %s connected, start proxying", addr)
-        with contextlib.suppress(_ClientDisconnected):
-            _proxy_serve_client(client, remote_ep)
+        # keep all the session resources in the ExitStack
+        with contextlib.ExitStack() as stack:
+            client = stack.enter_context(sock)
 
-        LOG.info("client %s disconnected, stop proxying", addr)
-        client.close()
+            LOG.info("client %s connected, start proxying", addr)
+            with contextlib.suppress(_ClientDisconnected):
+                _proxy_serve_client(client, remote_ep)
+
+            LOG.info("client %s disconnected, stop proxying", addr)
 
 
 def start_uott_proxy(local_tcp: EndPoint, remote_udp: EndPoint) -> None:
