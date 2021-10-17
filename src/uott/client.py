@@ -3,8 +3,8 @@
 import contextlib
 import logging
 import selectors
-import socket
 from itertools import count
+from socket import socket, AF_INET, SOCK_STREAM, SOCK_DGRAM, MSG_DONTWAIT
 from typing import Dict, Iterator
 
 from .protocol import serialize, deserialize, StreamTransformer
@@ -13,7 +13,7 @@ from .utils import EndPoint
 LOG = logging.getLogger("client")
 
 
-def _process_client(client: socket.socket, proxy: socket.socket,
+def _process_client(client: socket, proxy: socket,
                     dirmap: Dict[EndPoint, int],
                     revmap: Dict[int, EndPoint],
                     tags: Iterator[int]) -> None:
@@ -32,13 +32,13 @@ def _process_client(client: socket.socket, proxy: socket.socket,
             proxy.sendall(message)
 
 
-def _process_proxy(client: socket.socket, proxy: socket.socket,
+def _process_proxy(client: socket, proxy: socket,
                    revmap: Dict[int, EndPoint],
                    deserializer: StreamTransformer) -> None:
     """Process flow from the proxy."""
     with contextlib.suppress(BlockingIOError):
         while True:
-            chunk = proxy.recv(4096, socket.MSG_DONTWAIT)
+            chunk = proxy.recv(4096, MSG_DONTWAIT)
             assert chunk, "the TCP connection is closed, may be proxy failure"
 
             msgs = deserializer.send(chunk)
@@ -47,7 +47,7 @@ def _process_proxy(client: socket.socket, proxy: socket.socket,
                 client.sendto(dgram, revmap[tag])
 
 
-def _client_loop(client: socket.socket, proxy: socket.socket) -> None:
+def _client_loop(client: socket, proxy: socket) -> None:
     """Run client loop forever."""
     # prepare mappings for client endpoints
     tags = count()
@@ -82,13 +82,11 @@ def start_uott_client(local_udp: EndPoint, remote_tcp: EndPoint) -> None:
     # keep all the sockets in the ExitStack
     with contextlib.ExitStack() as stack:
         LOG.info("connecting to the remote TCP endpoint")
-        proxy = stack.enter_context(socket.socket(socket.AF_INET,
-                                                  socket.SOCK_STREAM))
+        proxy = stack.enter_context(socket(AF_INET, SOCK_STREAM))
         proxy.connect(remote_tcp)
 
         LOG.info("creating the local UDP endpoint")
-        client = stack.enter_context(socket.socket(socket.AF_INET,
-                                                   socket.SOCK_DGRAM))
+        client = stack.enter_context(socket(AF_INET, SOCK_DGRAM))
         client.bind(local_udp)
 
         LOG.info("starting client loop")
