@@ -20,7 +20,8 @@ def _process_client(client: socket, remote_ep: EndPoint,
                     tagmap: Dict[int, socket],
                     revmap: Dict[socket, int],
                     selector: selectors.DefaultSelector,
-                    deserializer: StreamTransformer) -> None:
+                    deserializer: StreamTransformer,
+                    stack: contextlib.ExitStack) -> None:
     """Process TCP flow from the client."""
     with contextlib.suppress(BlockingIOError):
         while True:
@@ -31,7 +32,7 @@ def _process_client(client: socket, remote_ep: EndPoint,
             msgs = deserializer.send(chunk)
             for tag, dgram in msgs:
                 if tag not in tagmap:
-                    sock = socket(AF_INET, SOCK_DGRAM)
+                    sock = stack.enter_context(socket(AF_INET, SOCK_DGRAM))
                     sock.bind(("0.0.0.0", 0))  # TODO: limit to one addr?
                     tagmap[tag] = sock
                     revmap[sock] = tag
@@ -56,7 +57,8 @@ def _process_remote(sock: socket, client: socket,
             client.sendall(msg)
 
 
-def _proxy_serve_client(client: socket, remote_ep: EndPoint) -> None:
+def _proxy_serve_client(client: socket, remote_ep: EndPoint,
+                        stack: contextlib.ExitStack) -> None:
     """Run new proxy session."""
     # prepare mappings for local UDP endpoints
     tagmap: Dict[int, socket] = {}
@@ -74,9 +76,8 @@ def _proxy_serve_client(client: socket, remote_ep: EndPoint) -> None:
         events = sel.select()
         for key, _ in events:
             if key.fileobj is client:
-                _process_client(client, remote_ep,
-                                tagmap, revmap,
-                                sel, deserializer)
+                _process_client(client, remote_ep, tagmap, revmap,
+                                sel, deserializer, stack)
             else:
                 sock = key.fileobj
                 assert sock in revmap, "corrupted selector"
@@ -97,7 +98,7 @@ def _proxy_loop(local: socket, remote_ep: EndPoint) -> None:
 
             LOG.info("client %s connected, start proxying", addr)
             with contextlib.suppress(_ClientDisconnected):
-                _proxy_serve_client(client, remote_ep)
+                _proxy_serve_client(client, remote_ep, stack)
 
             LOG.info("client %s disconnected, stop proxying", addr)
 
