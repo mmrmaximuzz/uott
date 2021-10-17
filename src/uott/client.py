@@ -20,7 +20,7 @@ def _process_client(client: socket, proxy: socket,
     """Transfer UDP message from the client socket to the proxy."""
     with contextlib.suppress(BlockingIOError):
         while True:
-            data, endpoint = client.recvfrom(65535, socket.MSG_DONTWAIT)
+            data, endpoint = client.recvfrom(65535, MSG_DONTWAIT)
             if endpoint not in dirmap:
                 tag = next(tags)
                 dirmap[endpoint] = tag
