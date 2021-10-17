@@ -32,7 +32,7 @@ def _process_client(client: socket.socket, remote_ep: EndPoint,
             for tag, dgram in msgs:
                 if tag not in tagmap:
                     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                    sock.bind(("127.0.0.1", 0))  # TODO: take bind IP from CLI
+                    sock.bind(("0.0.0.0", 0))  # TODO: limit to one addr?
                     tagmap[tag] = sock
                     revmap[sock] = tag
                     selector.register(sock, selectors.EVENT_READ)
