@@ -103,10 +103,8 @@ def start_uott_proxy(local_tcp: EndPoint, remote_udp: EndPoint) -> None:
     """Run proxy loop forever."""
     LOG.info("starting UOTT proxy: TCP:%s -> UDP:%s", local_tcp, remote_udp)
 
-    # keep all the sockets in the ExitStack
-    with contextlib.ExitStack() as stack:
-        LOG.info("creating local TCP endpoint")
-        local = stack.enter_context(socket(AF_INET, SOCK_STREAM))
+    LOG.info("creating local TCP endpoint")
+    with socket(AF_INET, SOCK_STREAM) as local:
         local.bind(local_tcp)
         local.listen(1)
 
