@@ -13,7 +13,7 @@ LOG = logging.getLogger("proxy")
 
 
 class _ClientDisconnected(Exception):
-    """Raise this exception to break server loop on client disconnect."""
+    """Raise this exception to break session loop on client disconnect."""
 
 
 def _process_client(client: socket, remote_ep: EndPoint,
