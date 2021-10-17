@@ -79,13 +79,17 @@ def start_uott_client(local_udp: EndPoint, remote_tcp: EndPoint) -> None:
     """Start UOTT client."""
     LOG.info("starting UOTT client: UDP:%s -> TCP:%s", local_udp, remote_tcp)
 
-    LOG.info("connecting to the remote TCP endpoint")
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as proxy:
+    # keep all the sockets in the ExitStack
+    with contextlib.ExitStack() as stack:
+        LOG.info("connecting to the remote TCP endpoint")
+        proxy = stack.enter_context(socket.socket(socket.AF_INET,
+                                                  socket.SOCK_STREAM))
         proxy.connect(remote_tcp)
 
         LOG.info("creating the local UDP endpoint")
-        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as client:
-            client.bind(local_udp)
+        client = stack.enter_context(socket.socket(socket.AF_INET,
+                                                   socket.SOCK_DGRAM))
+        client.bind(local_udp)
 
-            LOG.info("starting client loop")
-            _client_loop(client, proxy)
+        LOG.info("starting client loop")
+        _client_loop(client, proxy)
