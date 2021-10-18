@@ -1,6 +1,6 @@
 # uott
 
-Simple and stupid proxy for UDP applications.
+Simple and stupid transparent proxy for UDP applications.
 
 ## Introduction
 
