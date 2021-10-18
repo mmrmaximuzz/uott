@@ -31,6 +31,34 @@ debugging UDP applications, for example:
 
 ### Algorithm
 
+The algorithm of `uott` is very simple. First of all, the `uott-proxy` service
+is started on the remote side. After that, the `uott-client` service is launched
+on the local side. The client service establishes TCP connection with the proxy
+and opens a UDP socket for the clients.
+
+#### Client loop
+
+For each UDP message got from the UDP socket, the client checks the sources
+*address:port* of the received datagram. The client accounts the *address:port*
+pairs and assign a unique number (*tag*) for each pair. This *tag* is used then
+to deliver the UDP response to the original address. Then the UDP message's
+content is packed in UOTT message, which contains some magic number, *tag*,
+datagram length and the actual UDP payload. This UOTT message is serialized to
+the TCP stream and processed by the proxy service.
+
+#### Proxy loop
+
+The proxy service listens the TCP stream from the client and deserializes the
+UDP messages using *tag* and length encoded in the stream. For each new *tag*
+the proxy creates a new UDP socket. The socket is then used to send UDP
+datagrams, corresponding to this *tag*, to the remote UDP service. The answers
+from the remote UDP service are serialized again and sent over the TCP stream
+back to the client.
+
+#### Diagram
+
+There will be a nice picture soon.
+
 ### Pros/Cons
 
 **Pros**
