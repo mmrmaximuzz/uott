@@ -4,7 +4,7 @@ Simple and stupid transparent proxy for UDP applications.
 
 ## Introduction
 
-UOTT (UDP Over TCP Transport) is a simple and stupid proxy allowing to send UDP
+`uott` (UDP Over TCP Transport) is a simple and stupid proxy allowing to send UDP
 datagrams over TCP streams.
 
 ### Algorithm
