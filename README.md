@@ -85,6 +85,26 @@ Let's describe the advantages and the drawbacks of `uott`.
 
 ### Alternatives
 
+Let' compate `uott` with some alternatives:
+
+* *netcat/socat*. These programs are really good in debugging networks. However,
+  the task of transferring UDP datagrams over TCP channel cannot be solved using
+  these tools. *netcat/socat* just redirect streams, and the boundaries of UDP
+  messages are not preserved. You still can use it for proxying simple UDP
+  programs, but be ready for merged/truncated UDP datagrams.
+* *VPN tunnel*. VPN tunnels make the remote UDP endpoint reachable for the local
+  applications. There is no need to proxying UDP sockets on the remote side, and
+  the OS limitation on the number of opened files does not matter anymore. Some
+  adequate network protection is also provided, so most of the `uott` drawbacks
+  are resolved. However, an establishing of a full-blown VPN may be a complex
+  task, and usually it requires root privileges. Moreover, VPNs lack *proxy*
+  functionality, thus some `uott` cases cannot be covered (such as access to
+  remote loopback application).
+* *Advanced proxies*. If `uott` solves your task but you lack some extra
+  functionality, try to use advanced proxies. Look at SOCKS5, Shadowsocks, or
+  [pproxy](https://github.com/qwj/python-proxy). These projects are larger and
+  more complex than `uott` to use and setup, but they can provide more features.
+
 ## Usage
 
 ### Disclaimer
