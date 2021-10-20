@@ -85,7 +85,7 @@ Let's describe the advantages and the drawbacks of `uott`.
 
 ### Alternatives
 
-Let' compate `uott` with some alternatives:
+Let' compare `uott` with some alternatives:
 
 * *netcat/socat*. These programs are really good in debugging networks. However,
   the task of transferring UDP datagrams over TCP channel cannot be solved using
