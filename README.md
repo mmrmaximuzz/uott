@@ -107,7 +107,15 @@ Let' compate `uott` with some alternatives:
 
 ## Usage
 
+Before using `uott`, make sure that you understand its drawbacks. The short
+disclaimer is provided here to emphasize the possible problems with `uott`.
+
 ### Disclaimer
+
+The TCP connections created by `uott` are not protected - make sure that you
+don't use it over the public networks. UDP sockets are keeped on the remote
+proxying side for the end of the session - make sure that the remote OS will not
+become unreachable due to opening so many sockets.
 
 ### Case 1: UDP application on a remote's loopback
 
