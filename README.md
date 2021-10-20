@@ -117,8 +117,10 @@ don't use it over the public networks. UDP sockets are keeped on the remote
 proxying side for the end of the session - make sure that the remote OS will not
 become unreachable due to opening so many sockets.
 
-### Case 1: UDP application on a remote's loopback
+### Use cases
 
-### Case 2: secure UDP tunnel
+#### Case 1: UDP application on a remote's loopback
 
-### Case 3: UDP port forwarding for ADB
+#### Case 2: secure UDP tunnel
+
+#### Case 3: UDP port forwarding for ADB
