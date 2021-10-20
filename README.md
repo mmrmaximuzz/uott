@@ -68,7 +68,7 @@ Let's describe the advantages and the drawbacks of `uott`.
 * `uott` has no dependencies except the Python itself. Python is very common
   now, so `uott` can be used in many cases with ease.
 * `uott` is very simple. Like many UNIX tools, it solves one single task. The
-  module is < 10 files, < 500 lines of code, easy to audit.
+  whole package is < 10 files, < 500 lines of code, easy to audit.
 * `uott` does not require any root privileges (until you want it to listen
   privileged ports), so you can run it on remote machines as a regular user.
 
@@ -76,7 +76,7 @@ Let's describe the advantages and the drawbacks of `uott`.
 
 * `uott` does not protect its own TCP streams. If you need a protection, try to
   use `uott` in combination with SSH port forwarding. This is the cost of being
-  simple and stupid, because data protection is a really complicated topic.
+  simple and stupid, because network security is really complicated.
 * `uott` keeps all the UDP sockets on the proxy side for the whole session even
   when they are not used. You can reach the OS limit of opened sockets very
   quickly. In this case you may need a more complex solution like a VPN tunnel.
