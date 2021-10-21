@@ -183,4 +183,10 @@ python3 -m uott client 0.0.0.0:PORT_UDP 127.0.0.1:PORT_B
 Then you can use your `PORT_UDP` port on your client to transfer UDP datagrams
 to `X.Y.Z.K:PORT_X` using SSH gateway `A.B.C.D`.
 
-#### Case 3: UDP port forwarding for ADB
+#### Case 3: UDP port forwarding for Android Debug Bridge (ADB)
+
+The same as in case #2, but forward TCP ports using ADB instead of SSH.
+
+```shell
+adb forward tcp:PORT_B tcp:PORT_A
+```
