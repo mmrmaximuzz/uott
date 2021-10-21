@@ -151,6 +151,36 @@ netcat -u 127.0.0.1 30000
 
 Now you can see UDP clients talk transparently.
 
-#### Case 2: secure UDP tunnel
+#### Case 2: secure UDP tunnel over SSH
+
+Let's imagine that remote UDP service is on the `X.Y.Z.K:PORT_X` endpoint and
+the SSH gateway has the `A.B.C.D` address. First launch the proxy on SSH gateway
+(open TCP port on loopback, not on 0.0.0.0 to avoid connections from the
+external network):
+
+```shell
+python3 -m uott proxy 127.0.0.1:PORT_A X.Y.Z.K:PORT_X
+```
+
+Then on the client side forward some local `PORT_B` port to `PORT_A` of the
+SSH gateway:
+
+```shell
+ssh -L PORT_B:127.0.0.1:PORT_A LOGIN@A.B.C.D
+```
+
+Then launch the client on the client side listening UDP port `PORT_UDP` and
+connected to forwarded TCP port `PORT_B` (choose the best variant for you):
+
+```shell
+# listen on 127.0.0.1 if you want to use just local programs
+python3 -m uott client 127.0.0.1:PORT_UDP 127.0.0.1:PORT_B
+
+# listen on 0.0.0.0 if you want to allow external nodes to use the UDP tunnel
+python3 -m uott client 0.0.0.0:PORT_UDP 127.0.0.1:PORT_B
+```
+
+Then you can use your `PORT_UDP` port on your client to transfer UDP datagrams
+to `X.Y.Z.K:PORT_X` using SSH gateway `A.B.C.D`.
 
 #### Case 3: UDP port forwarding for ADB
