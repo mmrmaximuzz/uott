@@ -121,6 +121,36 @@ become unreachable due to opening so many sockets.
 
 #### Case 1: UDP application on a remote's loopback
 
+Let's simulate the UDP application on the loopback using `netcat` tool. Run the
+following command on the remote side:
+
+```shell
+netcat -ul 127.0.0.1 50000
+```
+
+It will open the UDP server on remote's loopback with port `50000`. In another
+terminal session launch `uott` proxy:
+
+```shell
+python3 -m uott proxy 0.0.0.0:40000 127.0.0.1:50000
+```
+
+This will launch the proxy on `40000` TCP port. Then connect the client:
+
+```shell
+python3 -m uott client 127.0.0.1:30000 ${REMOTE_IP}:40000
+```
+
+This will launch the client listening local UDP port `30000` connected to the
+proxy on `REMOTE_IP:40000`. Try the established proxy connection by running UDP
+client on the client side in another terminal.
+
+```shell
+netcat -u 127.0.0.1 30000
+```
+
+Now you can see UDP clients talk transparently.
+
 #### Case 2: secure UDP tunnel
 
 #### Case 3: UDP port forwarding for ADB
