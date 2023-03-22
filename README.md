@@ -1,6 +1,7 @@
 # uott
 
-Simple and stupid transparent proxy for UDP applications.
+Simple and stupid transparent proxy for UDP applications. There are probably
+lots of better ways to do it.
 
 ## Introduction
 
@@ -100,10 +101,16 @@ Let' compare `uott` with some alternatives:
   task, and usually it requires root privileges. Moreover, VPNs lack *proxy*
   functionality, thus some `uott` cases cannot be covered (such as access to
   remote loopback application).
-* *Advanced proxies*. If `uott` solves your task but you lack some extra
-  functionality, try to use advanced proxies. Look at SOCKS5, Shadowsocks, or
-  [pproxy](https://github.com/qwj/python-proxy). These projects are larger and
-  more complex than `uott` to use and setup, but they can provide more features.
+* *Advanced proxies*. If `uott` solves your task but lacks some extra
+  functionality, try to use advanced proxies, such as:
+  - SOCKS
+  - Shadowsocks
+  - [pproxy](https://github.com/qwj/python-proxy)
+  - [sshuttle](https://github.com/sshuttle/sshuttle)
+  - or search the internet for comprehensive tools review like
+    [anderspitman/awesome-tunneling](https://github.com/anderspitman/awesome-tunneling)
+  These projects are larger and can more complex than `uott` to use and setup,
+  but they provide more features.
 
 ## Usage
 
